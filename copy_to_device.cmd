@@ -1,0 +1,1 @@
+xcopy .\* E:\ /s /d /exclude:excludedfileslist.txt /Y
