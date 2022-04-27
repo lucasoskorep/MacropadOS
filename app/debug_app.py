@@ -40,7 +40,7 @@ class DebugApp(App):
             self.labels.append(label.Label(terminalio.FONT, text=""))
 
         for index in range(12):
-            x = index % 3 + 1
+            x = index % 3
             y = index // 3
             self.layout.add_content(self.labels[index], grid_position=(x, y), cell_size=(1, 1))
 

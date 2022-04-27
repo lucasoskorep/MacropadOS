@@ -14,10 +14,15 @@ class AppRouter(object):
         self.current_app = apps[self.app_index]
         self.config = config
         self.encoder_state = False
-        self.options_time = 1000000000  # .5 seconds in nanoseconds
+        self.options_time = 500000000  # .5 seconds in nanoseconds
         self.click_time = 0
 
     def swap_to_app(self, app):
+        """
+        TODO: Calculate the size of the stack and the max size of hte stack and then fully close apps if need be.
+        :param app:
+        :return:
+        """
         print("Pausing current app")
         self.current_app.pause()
         print("Selecting new app")
@@ -55,9 +60,6 @@ class AppRouter(object):
                 print("released encoder")
             if self.encoder_state and self.click_time:
                 self.release_time = time.monotonic_ns()
-                print(self.release_time)
-                print(self.click_time)
-                print(self.release_time - self.click_time)
                 if (time.monotonic_ns() - self.click_time) > self.options_time:
                     self.macropad.play_tone(1000, .1)
                     self.swap_to_app(self.options)
