@@ -2,7 +2,7 @@ import terminalio
 from adafruit_display_text import label
 from adafruit_displayio_layout.layouts.grid_layout import GridLayout
 
-from common.light_patterns import arrows_yes_no
+from .common import arrows_yes_no, arrows_with_enter, up_down_enter
 from ..abstract_app import App
 
 
@@ -14,6 +14,7 @@ class OptionsApp(App):
         self.labels = []
         self.layout = GridLayout(x=0, y=9, width=128, height=54, grid_size=(4, 4), cell_padding=1)
         self.key_colors = arrows_yes_no
+        self.possible_key_colors = [arrows_yes_no, arrows_with_enter, up_down_enter]
         self.title = label.Label(
             y=4,
             font=terminalio.FONT,
@@ -21,6 +22,7 @@ class OptionsApp(App):
             text=f"     OPTIONS MENU     ",
             background_color=0xFFFFFF,
         )
+        self.counter = 0
 
     def on_start(self):
         print("on start from the app!")
@@ -50,6 +52,8 @@ class OptionsApp(App):
     def loop(self):
         self.process_key_presses()
         self.light_keys()
+        self.key_colors = self.possible_key_colors[self.counter % len(self.possible_key_colors)]
+        self.counter+=1
 
     def process_key_presses(self):
         key_event = self.macropad.keys.events.get()
@@ -57,11 +61,10 @@ class OptionsApp(App):
             if key_event.key_number < 12:
                 if key_event.pressed:
                     self.macropad.stop_tone()
-                    self.macropad.start_tone(200)
+                    self.macropad.start_tone(440)
                 else:
                     self.macropad.stop_tone()
 
     def light_keys(self):
         for pixel in range(12):
-            print(pixel)
             self.macropad.pixels[pixel] = self.key_colors[pixel]

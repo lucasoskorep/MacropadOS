@@ -1,7 +1,7 @@
 import time
 
 from .app_state import AppState
-from app.options.options_app import OptionsApp
+from .default_apps.options_app import OptionsApp
 
 
 class AppRouter(object):
