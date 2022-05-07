@@ -18,3 +18,4 @@ class Config(object):
     def save(self):
         with open(self.save_file, "w") as f:
             json.dump(self.data, f)
+

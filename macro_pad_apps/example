@@ -4,7 +4,10 @@
     "k2":["TWO"],
     "k3":["THREE"],
     "k4":["ONE"],
-    "k5":["TWO"],
+    "k5":{
+    "keys":["TWO"],
+    "name":""
+    }
     "k6":["THREE"],
     "k7":["ONE"],
     "k8":["TWO"],
@@ -13,3 +16,5 @@
     "k11":["TWO"],
     "k12":["THREE"],
 }
+
+example.k1.name

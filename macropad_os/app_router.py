@@ -33,7 +33,6 @@ class AppRouter(object):
         if self.current_app.state is AppState.PAUSED:
             print("Starting new app")
             self.current_app.resume()
-        print(time.monotonic_ns())
 
     def start(self):
         self.current_app.start()
