@@ -1,4 +1,6 @@
 {
   "dev_mode": true,
-  "brightness": 100
+  "debug_app_enabled": true,
+  "brightness": 100,
+  "default_tone": 523
 }
