@@ -1,0 +1,55 @@
+{
+    "profileName" : "Gamepad",
+    "sortOrder"   : 1,
+    
+    "key1" : {
+        "text"  : ["ESC"],
+        "value" : ["ESCAPE"]
+    },
+    "key2" : {
+        "text"  : ["Tab"],
+        "value" : ["TAB"]
+    },
+    "key3" : {
+        "text"  : ["R"],
+        "value" : ["R"]
+    },
+    "key4" : {
+        "text"  : ["Q"],
+        "value" : ["Q"]
+    },
+    "key5" : {
+        "text"  : ["W"],
+        "value" : ["W"]
+    },
+    "key6" : {
+        "text"  : ["E"],
+        "value" : ["E"]
+    },
+    "key7" : {
+        "text"  : ["A"],
+        "value" : ["A"]
+    },
+    "key8" : {
+        "text"  : ["S"],
+        "value" : ["S"]
+    },
+    "key9" : {
+        "text"  : ["D"],
+        "value" : ["D"]
+    },
+    "key10" : {
+        "text"  : ["Shift"],
+        "value" : [""]
+    },
+    "key11" : {
+        "text"  : ["C"],
+        "value" : ["C"]
+    },
+    "key12" : {
+        "text"  : ["Space"],
+        "value" : ["SPACEBAR"]
+    }
+}
+
+

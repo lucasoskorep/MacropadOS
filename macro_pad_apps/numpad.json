@@ -1,0 +1,53 @@
+{
+    "profileName" : "NumPad",
+    "sortOrder"   : 0,
+    
+    "key1" : {
+        "text"  : ["7"],
+        "value" : ["SEVEN"]
+    },
+    "key2" : {
+        "text"  : ["8"],
+        "value" : ["EIGHT"]
+    },
+    "key3" : {
+        "text"  : ["9"],
+        "value" : ["NINE"]
+    },
+    "key4" : {
+        "text"  : ["4"],
+        "value" : ["FOUR"]
+    },
+    "key5" : {
+        "text"  : ["5"],
+        "value" : ["FIVE"]
+    },
+    "key6" : {
+        "text"  : ["6"],
+        "value" : ["SIX"]
+    },
+    "key7" : {
+        "text"  : ["1"],
+        "value" : ["ONE"]
+    },
+    "key8" : {
+        "text"  : ["2"],
+        "value" : ["TWO"]
+    },
+    "key9" : {
+        "text"  : ["3"],
+        "value" : ["THREE"]
+    },
+    "key10" : {
+        "text"  : ["0"],
+        "value" : ["ZERO"]
+    },
+    "key11" : {
+        "text"  : ["."],
+        "value" : ["PERIOD"]
+    },
+    "key12" : {
+        "text"  : ["ENT"],
+        "value" : ["RETURN"]
+    }
+}
