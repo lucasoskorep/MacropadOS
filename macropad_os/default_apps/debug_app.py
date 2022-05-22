@@ -1,4 +1,5 @@
 import terminalio
+
 from adafruit_display_text import bitmap_label as label
 from adafruit_displayio_layout.layouts.grid_layout import GridLayout
 from rainbowio import colorwheel
@@ -28,13 +29,13 @@ class DebugApp(App):
         self.set_layout(GridLayout(x=0, y=9, width=128, height=54, grid_size=(4, 4), cell_padding=1))
         self.set_title(self.title)
         self.lit_keys = [True] * 12
+
         for _ in range(12):
             self.labels.append(label.Label(terminalio.FONT, text=""))
-
-        # for index in range(12):
-        #     x = index % 3
-        #     y = index // 3
-        #     self.layout.add_content(self.labels[index], grid_position=(x, y), cell_size=(1, 1))
+        for index in range(12):
+            x = index % 3
+            y = index // 3
+            self._layout.add_content(self.labels[index], grid_position=(x, y), cell_size=(1, 1))
         self.set_tone_status(True)
         self.set_tones([196, 220, 246, 262, 294, 330, 349, 392, 440, 494, 523, 587])
         self.register_on_key_pressed(self.process_keys_pressed_callback)

@@ -1,6 +1,6 @@
 import storage
 
-from config import Config, ConfigVars
+from macropad_os.config import Config, ConfigVars
 
 config = Config("config.json")
 

@@ -3,7 +3,6 @@ import time
 from .app_state import AppState
 from .default_apps.options_app import OptionsApp
 
-
 class AppRouter(object):
     def __init__(self, macropad, config, apps):
         print("app router")
@@ -34,7 +33,7 @@ class AppRouter(object):
             print("Starting new app")
             self.current_app.resume()
 
-    def start(self):
+    def start(self) -> None:
         self.current_app.start()
         self.current_app.resume()
 

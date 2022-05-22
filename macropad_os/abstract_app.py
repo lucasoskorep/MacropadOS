@@ -1,7 +1,6 @@
 import displayio
 import terminalio
 from adafruit_display_text import label
-from adafruit_hid.keycode import Keycode
 
 from .app_state import AppState, InvalidStateUpdateError
 
@@ -39,14 +38,14 @@ class App(object):
         self._key_released_callbacks = []
         self._encoder_changed_callbacks = []
         self._encoder_state = 0
-
+        self._labels = []
 
         self.macropad = macropad
         self.config = config
         self.name = "app"
         self.state = AppState.STOPPED
 
-    def start(self):
+    def start(self) -> None:
         print("Start from base class ")
         if self.state is not AppState.STOPPED:
             raise InvalidStateUpdateError(f"Start called but the current app state is {self.state}")
@@ -55,13 +54,13 @@ class App(object):
         self.on_start()
         self.state = AppState.PAUSED
 
-    def _on_start(self):
+    def _on_start(self) -> None:
         pass
 
-    def on_start(self):
+    def on_start(self) -> None:
         raise NotImplementedError("on_start not implemented")
 
-    def resume(self):
+    def resume(self) -> None:
         if self.state is not AppState.PAUSED:
             raise InvalidStateUpdateError(f"Resume called but the current app state is {self.state}")
         self.state = AppState.RESUMING
@@ -69,13 +68,13 @@ class App(object):
         self.on_resume()
         self.state = AppState.RUNNING
 
-    def _on_resume(self):
+    def _on_resume(self) -> None:
         self.add_displays_to_group()
 
-    def on_resume(self):
+    def on_resume(self) -> None:
         raise NotImplementedError("on_resume not implemented")
 
-    def pause(self):
+    def pause(self) -> None:
         if self.state is not AppState.RUNNING:
             raise InvalidStateUpdateError(f"Pause called but the current app state is {self.state}")
         self.state = AppState.PAUSING
@@ -83,7 +82,7 @@ class App(object):
         self.on_pause()
         self.state = AppState.PAUSED
 
-    def _on_pause(self):
+    def _on_pause(self) -> None:
         self.macropad.keyboard.release_all()
         self.macropad.consumer_control.release()
         self.macropad.mouse.release_all()
@@ -91,24 +90,24 @@ class App(object):
         self.macropad.pixels.show()
         self.remove_displays_from_group()
 
-    def on_pause(self):
+    def on_pause(self) -> None:
         raise NotImplementedError("on_pause not implemented")
 
-    def loop(self):
+    def loop(self) -> None:
         # We'll fire you if you override this method.
         self._on_loop()
         self.on_loop()
 
-    def on_loop(self):
+    def on_loop(self) -> None:
         raise NotImplementedError("Not implemented")
 
-    def _on_loop(self):
+    def _on_loop(self) -> None:
         self._update_lighting()
         self._process_keys_pressed()
         self._process_wheel_changes()
         self.on_loop()
 
-    def _process_keys_pressed(self):
+    def _process_keys_pressed(self) -> None:
         key_event = self.macropad.keys.events.get()
         if key_event:
             if key_event.key_number < 12:
@@ -128,7 +127,7 @@ class App(object):
                         for callback in self._key_pressed_callbacks:
                             callback(key_event.key_number)
 
-    def _process_wheel_changes(self):
+    def _process_wheel_changes(self) -> None:
         encoder = self.macropad.encoder
         if self._encoder_state != encoder:
             for callback in self._encoder_changed_callbacks:
@@ -138,7 +137,7 @@ class App(object):
                     callback(1)
             self._encoder_state = encoder
 
-    def stop(self):
+    def stop(self) -> None:
         if self.state is not AppState.PAUSED:
             raise InvalidStateUpdateError(f"Stop called but the current app state is {self.state}")
         self.state = AppState.STOPPING
@@ -146,17 +145,17 @@ class App(object):
         self.on_stop()
         self.state = AppState.STOPPED
 
-    def _on_stop(self):
+    def _on_stop(self) -> None:
         pass
 
-    def on_stop(self):
+    def on_stop(self) -> None:
         raise NotImplementedError("on_stop not implemented.")
 
-    def _update_lighting(self):
+    def _update_lighting(self) -> None:
         for index, color in enumerate(self._key_lights):
             self.macropad.pixels[index] = color
 
-    def add_displays_to_group(self):
+    def add_displays_to_group(self) -> None:
         self._display_group.append(self._title_label)
         self._display_group.append(self._layout)
         self.macropad.display.show(self._display_group)
@@ -165,14 +164,14 @@ class App(object):
         self._display_group.remove(self._title_label)
         self._display_group.remove(self._layout)
 
-    def set_color(self, x, y, color):
+    def set_color(self, x, y, color) -> None:
         key_value = convert_to_keynum(x, y)
         if key_value >= 12:
             raise ValueError("color index out of range")
         if len(color) != 3:
             self._key_lights[key_value] = color
 
-    def set_colors(self, colors):
+    def set_colors(self, colors) -> None:
         if len(colors) != 12:
             raise ValueError("Colors must be passed in as a 12 len array")
         for color in colors:
@@ -180,17 +179,17 @@ class App(object):
                 raise ValueError("Color format error - color must be length 3")
         self._key_lights = colors
 
-    def get_colors(self):
+    def get_colors(self) -> [(int, int, int)]:
         return self._key_lights
 
-    def set_tone(self, keypad_num, tone):
+    def set_tone(self, keypad_num, tone) -> None:
         if keypad_num >= 12:
             raise ValueError("Tone index out of range")
         if tone < 20 or tone > 20000:
             raise ValueError("Tone format error - tone out of human hearing range (20 - 20000)")
         self._key_tones[keypad_num] = tone
 
-    def set_tones(self, tones):
+    def set_tones(self, tones) -> None:
         if len(tones) != 12:
             raise ValueError("Tones must be passed in as a 12 len array")
         for tone in tones:
@@ -198,13 +197,13 @@ class App(object):
                 raise ValueError("Tone format error - tone out of human hearing range (20 - 20000)")
         self._key_tones = tones
 
-    def set_tone_status(self, enable):
+    def set_tone_status(self, enable) -> None:
         self._enabled_key_sounds = enable
 
-    def get_tones(self):
+    def get_tones(self) -> [int]:
         return self._key_tones
 
-    def set_title(self, title):
+    def set_title(self, title) -> None:
         """
         :string title: Title of your app - shown in the top bar.
 
@@ -217,7 +216,7 @@ class App(object):
         diff = int((22 - len(title)) / 2)
         self._title_label.text = f"{''.join([' ' for _ in range(diff)])}{self._title}{''.join([' ' for _ in range(diff)])}"
 
-    def set_layout(self, layout):
+    def set_layout(self, layout) -> None:
         """
         :displayio.Group layout:
 
@@ -225,13 +224,15 @@ class App(object):
         """
         self._layout = layout
 
-    def register_on_key_pressed(self, function):
+    def set_labels(self, labels) -> None:
+        self._labels = labels
+        # if self._layout
+
+    def register_on_key_pressed(self, function) -> None:
         self._key_pressed_callbacks.append(function)
 
-    def register_on_key_released(self, function):
+    def register_on_key_released(self, function) -> None:
         self._key_released_callbacks.append(function)
 
-    def register_on_encoder_changed(self, function):
+    def register_on_encoder_changed(self, function) -> None:
         self._encoder_changed_callbacks.append(function)
-
-
