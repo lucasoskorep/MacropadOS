@@ -1,8 +1,10 @@
+import time
+
 import displayio
 import terminalio
 from adafruit_display_text import label
 
-from .app_state import AppState, InvalidStateUpdateError
+from macropad_os import AppState, InvalidStateUpdateError, Config
 
 DISPLAY = displayio.Group()
 
@@ -13,7 +15,7 @@ def convert_to_keynum(x, y):
 
 class App(object):
 
-    def __init__(self, macropad, config):
+    def __init__(self, macropad, config: Config):
         """
 
         :param macropad:
@@ -31,28 +33,29 @@ class App(object):
             text=f"",
             background_color=0xFFFFFF,
         )
-        self._key_tones = [config.data["default_tone"] for _ in range(12)]
-        self._enabled_key_sounds = True
         self._pressed_keys = []
         self._key_pressed_callbacks = []
         self._key_released_callbacks = []
         self._encoder_changed_callbacks = []
         self._encoder_state = 0
         self._labels = []
+        self._state = AppState.STOPPED
+        self._name = "app"
+        self._key_tones = {}
+
+        self._current_brightness = config.brightness()
 
         self.macropad = macropad
         self.config = config
-        self.name = "app"
-        self.state = AppState.STOPPED
 
     def start(self) -> None:
         print("Start from base class ")
-        if self.state is not AppState.STOPPED:
-            raise InvalidStateUpdateError(f"Start called but the current app state is {self.state}")
-        self.state = AppState.STARTING
+        if self._state is not AppState.STOPPED:
+            raise InvalidStateUpdateError(f"Start called but the current app state is {self._state}")
+        self._state = AppState.STARTING
         self._on_start()
         self.on_start()
-        self.state = AppState.PAUSED
+        self._state = AppState.PAUSED
 
     def _on_start(self) -> None:
         pass
@@ -61,12 +64,12 @@ class App(object):
         raise NotImplementedError("on_start not implemented")
 
     def resume(self) -> None:
-        if self.state is not AppState.PAUSED:
-            raise InvalidStateUpdateError(f"Resume called but the current app state is {self.state}")
-        self.state = AppState.RESUMING
+        if self._state is not AppState.PAUSED:
+            raise InvalidStateUpdateError(f"Resume called but the current app state is {self._state}")
+        self._state = AppState.RESUMING
         self._on_resume()
         self.on_resume()
-        self.state = AppState.RUNNING
+        self._state = AppState.RUNNING
 
     def _on_resume(self) -> None:
         self.add_displays_to_group()
@@ -75,12 +78,12 @@ class App(object):
         raise NotImplementedError("on_resume not implemented")
 
     def pause(self) -> None:
-        if self.state is not AppState.RUNNING:
-            raise InvalidStateUpdateError(f"Pause called but the current app state is {self.state}")
-        self.state = AppState.PAUSING
+        if self._state is not AppState.RUNNING:
+            raise InvalidStateUpdateError(f"Pause called but the current app state is {self._state}")
+        self._state = AppState.PAUSING
         self._on_pause()
         self.on_pause()
-        self.state = AppState.PAUSED
+        self._state = AppState.PAUSED
 
     def _on_pause(self) -> None:
         self.macropad.keyboard.release_all()
@@ -113,19 +116,33 @@ class App(object):
             if key_event.key_number < 12:
                 if key_event.pressed:
                     self.macropad.stop_tone()
-                    self.macropad.start_tone(self._key_tones[key_event.key_number])
-                    self._pressed_keys.append(key_event.key_number)
+                    print(self.config.get_items())
+                    self._play_tone_for_key(key_event.key_number)
                     if self._key_pressed_callbacks:
                         for callback in self._key_pressed_callbacks:
                             callback(key_event.key_number)
                 else:
-                    self.macropad.stop_tone()
-                    self._pressed_keys.remove(key_event.key_number)
-                    if self._pressed_keys:
-                        self.macropad.start_tone(self._key_tones[self._pressed_keys[0]])
+                    self._stop_tone_for_key(key_event.key_number)
                     if self._key_released_callbacks:
                         for callback in self._key_pressed_callbacks:
                             callback(key_event.key_number)
+
+    def _play_tone_for_key(self, key_number):
+        if self.config.key_tone_enabled():
+            if key_number in self._key_tones:
+                self.macropad.start_tone(self._key_tones[key_number])
+            else:
+                self.macropad.start_tone(self.config.key_tone_hz())
+        self._pressed_keys.append(key_number)
+
+    def _stop_tone_for_key(self, key_number):
+        self.macropad.stop_tone()
+        self._pressed_keys.remove(key_number)
+        if self._pressed_keys and self.config.key_tone_enabled():
+            if key_number in self._key_tones:
+                self.macropad.start_tone(self._key_tones[self._pressed_keys[0]])
+            else:
+                self.macropad.start_tone(self.config.key_tone_hz())
 
     def _process_wheel_changes(self) -> None:
         encoder = self.macropad.encoder
@@ -138,12 +155,12 @@ class App(object):
             self._encoder_state = encoder
 
     def stop(self) -> None:
-        if self.state is not AppState.PAUSED:
-            raise InvalidStateUpdateError(f"Stop called but the current app state is {self.state}")
-        self.state = AppState.STOPPING
+        if self._state is not AppState.PAUSED:
+            raise InvalidStateUpdateError(f"Stop called but the current app state is {self._state}")
+        self._state = AppState.STOPPING
         self._on_stop()
         self.on_stop()
-        self.state = AppState.STOPPED
+        self._state = AppState.STOPPED
 
     def _on_stop(self) -> None:
         pass
@@ -152,6 +169,14 @@ class App(object):
         raise NotImplementedError("on_stop not implemented.")
 
     def _update_lighting(self) -> None:
+        new_brightness = self.config.brightness()
+        if self._current_brightness != new_brightness:
+            print("SETTING BRIGHTNESS!!!!")
+            print(self._key_lights)
+            self._key_lights = [tuple(rgb_val * new_brightness / self._current_brightness for rgb_val in color) for
+                                color in self._key_lights]
+            print(self._key_lights)
+            self._current_brightness = self.config.brightness()
         for index, color in enumerate(self._key_lights):
             self.macropad.pixels[index] = color
 
@@ -165,6 +190,8 @@ class App(object):
         self._display_group.remove(self._layout)
 
     def set_color(self, x, y, color) -> None:
+        print("setting color")
+        color = tuple(rgb_val * self._current_brightness for rgb_val in color)
         key_value = convert_to_keynum(x, y)
         if key_value >= 12:
             raise ValueError("color index out of range")
@@ -172,12 +199,14 @@ class App(object):
             self._key_lights[key_value] = color
 
     def set_colors(self, colors) -> None:
+        print(time.time())
         if len(colors) != 12:
             raise ValueError("Colors must be passed in as a 12 len array")
         for color in colors:
             if len(color) != 3:
                 raise ValueError("Color format error - color must be length 3")
-        self._key_lights = colors
+        self._key_lights = [tuple(round(rgb_val * self._current_brightness / 100) for rgb_val in color) for color in
+                            colors]
 
     def get_colors(self) -> [(int, int, int)]:
         return self._key_lights
@@ -195,12 +224,10 @@ class App(object):
         for tone in tones:
             if tone < 20 or tone > 20000:
                 raise ValueError("Tone format error - tone out of human hearing range (20 - 20000)")
-        self._key_tones = tones
+        for index, hz in enumerate(tones):
+            self._key_tones[index] = hz
 
-    def set_tone_status(self, enable) -> None:
-        self._enabled_key_sounds = enable
-
-    def get_tones(self) -> [int]:
+    def get_tones(self) -> {int: int}:
         return self._key_tones
 
     def set_title(self, title) -> None:

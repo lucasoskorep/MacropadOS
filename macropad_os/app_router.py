@@ -1,7 +1,8 @@
 import time
-
 from .app_state import AppState
-from .default_apps.options_app import OptionsApp
+
+from macropad_os.system_apps import OptionsApp, DebugApp
+
 
 class AppRouter(object):
     def __init__(self, macropad, config, apps):
@@ -15,6 +16,10 @@ class AppRouter(object):
         self.encoder_state = False
         self.options_time = 500000000  # .5 seconds in nanoseconds
         self.click_time = 0
+        self.debug_app = DebugApp(macropad, config, "DEBUG APP")
+        self.debug_app_active = self.config.debug_app_enabled()
+        if self.debug_app_active:
+            self.apps.append(self.debug_app)
 
     def swap_to_app(self, app):
         """
@@ -26,10 +31,10 @@ class AppRouter(object):
         self.current_app.pause()
         print("Selecting new app")
         self.current_app = app
-        if self.current_app.state is AppState.STOPPED:
+        if self.current_app._state is AppState.STOPPED:
             print("Starting new app")
             self.current_app.start()
-        if self.current_app.state is AppState.PAUSED:
+        if self.current_app._state is AppState.PAUSED:
             print("Starting new app")
             self.current_app.resume()
 
@@ -51,6 +56,12 @@ class AppRouter(object):
                 self.encoder_state = False
                 if self.current_app is self.options:
                     print("Moving from options to the last opened app.")
+                    if self.debug_app_active != self.config.debug_app_enabled():
+                        if self.debug_app_active:
+                            self.apps.append(self.debug_app)
+                        else:
+                            self.apps.remove(self.debug_app)
+                        self.debug_app_active = self.config.debug_app_enabled()
                 else:
                     self.app_index += 1
                     print("Moving to the next app on the list. ")

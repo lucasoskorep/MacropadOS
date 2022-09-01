@@ -1,16 +1,32 @@
 import storage
 
-from macropad_os.config import Config, ConfigVars
+from macropad_os import Config
 
-config = Config("config.json")
 
-print("test")
-print(config.data)
+default_config = Config("default_config.json").load()
+config = Config("config.json").load(default_config)
+dev_mode = config.get_item_by_name("dev_mode")
 
-if not config.data.get(ConfigVars.DEV_MODE.name):
-    storage.disable_usb_drive()
-    print("file system should be writable")
-    storage.remount("/", False)
-    config.data[ConfigVars.DEV_MODE.name] = True
-    config.save()
-    print("success")
+if dev_mode :
+    if not dev_mode.value:
+        print("file system should not be writable - dev mode not active")
+        storage.disable_usb_drive()
+        storage.remount("/", False)
+        dev_mode_active = config.get_item_by_name("dev_mode_active")
+        dev_mode_active.value = False
+        config.set_item(dev_mode_active)
+        config.save()
+    else:
+        # dev mode is on and needs to be disabled
+        print("Disabling dev mode before boot so that settings will work")
+        storage.disable_usb_drive()
+        storage.remount("/", False)
+        dev_mode = config.get_item_by_name("dev_mode")
+        dev_mode.value = False
+        config.set_item(dev_mode)
+        dev_mode_active = config.get_item_by_name("dev_mode_active")
+        dev_mode_active.value = True
+        config.set_item(dev_mode_active)
+        config.save()
+        storage.enable_usb_drive()
+        storage.remount("/", True)

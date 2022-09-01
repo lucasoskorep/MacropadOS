@@ -1,16 +1,19 @@
-from macropad_os import AppRouter, DebugApp, SerialComms
-from macropad_os.config import Config
+from macropad_os import AppRouter, SerialComms, Config
+from macropad_os.system_apps import DebugApp
 
 from adafruit_macropad import MacroPad
 
+from python_apps import NumpadApp
 
 macropad = MacroPad()
-config = Config("config.json")
 
+default_config = Config("default_config.json").load()
+config = Config("config.json").load(default_config)
 
 ar = AppRouter(macropad, config, [
-    DebugApp(macropad, config, "DEBUG 1"),
-    DebugApp(macropad, config, "DEBUG 2")
+    NumpadApp(macropad, config),
+#  Arrow Keys
+#  Script Runner
 ])
 
 sc = SerialComms(config)

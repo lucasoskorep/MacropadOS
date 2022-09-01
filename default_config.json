@@ -27,7 +27,7 @@
     }
   },
   "key_tone_hz": {
-    "current_value": 690,
+    "current_value": 523,
     "value_range": {
       "end": 1500,
       "start": 0
@@ -37,10 +37,10 @@
     }
   },
   "brightness": {
-    "current_value": 75,
+    "current_value": 100,
     "value_range": {
       "end": 100,
-      "start": 1
+      "start": 0
     }
   },
   "rgb_blue": {
@@ -54,7 +54,7 @@
     }
   },
   "key_tone": {
-    "current_value": false,
+    "current_value": true,
     "available_values": [
       true,
       false
@@ -62,13 +62,6 @@
   },
   "dev_mode": {
     "current_value": false,
-    "available_values": [
-      true,
-      false
-    ]
-  },
-  "debug_app": {
-    "current_value": true,
     "available_values": [
       true,
       false
