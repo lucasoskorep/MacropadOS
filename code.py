@@ -1,9 +1,8 @@
 from macropad_os import AppRouter, SerialComms, Config
-from macropad_os.system_apps import DebugApp
 
 from adafruit_macropad import MacroPad
 
-from python_apps import NumpadApp
+from macropad_apps.python import NumpadApp
 
 macropad = MacroPad()
 
