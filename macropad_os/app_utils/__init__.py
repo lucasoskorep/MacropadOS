@@ -1,3 +1,3 @@
-from .light_patterns import *
+from .static_lighting import *
 from .sound_patterns import *
-from .helper_funcs import *
+from .helpers import *
