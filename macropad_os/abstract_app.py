@@ -1,4 +1,4 @@
-import time
+from time import monotonic_ns
 
 import displayio
 import terminalio
@@ -12,6 +12,9 @@ DISPLAY = displayio.Group()
 def convert_to_keynum(x, y):
     return 3 * x + y
 
+#TODO: Limit sounds to a similar rate as well for better performance
+
+MAX_LIGHTING_UPDATE_RATE = 50000000 # .05 seconds
 
 class App(object):
 
@@ -42,10 +45,12 @@ class App(object):
         self._state = AppState.STOPPED
         self._name = "app"
         self._key_tones = {}
+        self._last_lighting_update = 0
 
         self._current_brightness = config.brightness()
 
         self.macropad = macropad
+        self.keyboard = macropad.keyboard
         self.config = config
 
     def start(self) -> None:
@@ -86,7 +91,7 @@ class App(object):
         self._state = AppState.PAUSED
 
     def _on_pause(self) -> None:
-        self.macropad.keyboard.release_all()
+        self.keyboard.release_all()
         self.macropad.consumer_control.release()
         self.macropad.mouse.release_all()
         self.macropad.stop_tone()
@@ -116,7 +121,6 @@ class App(object):
             if key_event.key_number < 12:
                 if key_event.pressed:
                     self.macropad.stop_tone()
-                    print(self.config.get_items())
                     self._play_tone_for_key(key_event.key_number)
                     if self._key_pressed_callbacks:
                         for callback in self._key_pressed_callbacks:
@@ -124,7 +128,7 @@ class App(object):
                 else:
                     self._stop_tone_for_key(key_event.key_number)
                     if self._key_released_callbacks:
-                        for callback in self._key_pressed_callbacks:
+                        for callback in self._key_released_callbacks:
                             callback(key_event.key_number)
 
     def _play_tone_for_key(self, key_number):
@@ -169,16 +173,17 @@ class App(object):
         raise NotImplementedError("on_stop not implemented.")
 
     def _update_lighting(self) -> None:
-        new_brightness = self.config.brightness()
-        if self._current_brightness != new_brightness:
-            print("SETTING BRIGHTNESS!!!!")
-            print(self._key_lights)
-            self._key_lights = [tuple(rgb_val * new_brightness / self._current_brightness for rgb_val in color) for
-                                color in self._key_lights]
-            print(self._key_lights)
-            self._current_brightness = self.config.brightness()
-        for index, color in enumerate(self._key_lights):
-            self.macropad.pixels[index] = color
+        last_update_ago = monotonic_ns() - self._last_lighting_update
+        if last_update_ago >  MAX_LIGHTING_UPDATE_RATE:
+            self._last_lighting_update = monotonic_ns()
+            new_brightness = self.config.brightness()
+            if self._current_brightness != new_brightness:
+                # Setting the brightness here
+                self._key_lights = [tuple(rgb_val * new_brightness / self._current_brightness for rgb_val in color) for
+                                    color in self._key_lights]
+                self._current_brightness = self.config.brightness()
+            for index, color in enumerate(self._key_lights):
+                self.macropad.pixels[index] = color
 
     def add_displays_to_group(self) -> None:
         self._display_group.append(self._title_label)

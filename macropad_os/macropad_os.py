@@ -4,14 +4,14 @@ from .app_state import AppState
 from macropad_os.system_apps import OptionsApp, DebugApp
 
 
-class AppRouter(object):
+class MacropadOS(object):
     def __init__(self, macropad, config, apps):
         print("app router")
         self.macropad = macropad
         self.app_index = 0
-        self.apps = apps
+        self.apps = [a(macropad, config) for a in apps]
         self.options = OptionsApp(macropad, config)
-        self.current_app = apps[self.app_index]
+        self.current_app = self.apps[self.app_index]
         self.config = config
         self.encoder_state = False
         self.options_time = 500000000  # .5 seconds in nanoseconds
@@ -39,6 +39,7 @@ class AppRouter(object):
             self.current_app.resume()
 
     def start(self) -> None:
+        print(self.current_app)
         self.current_app.start()
         self.current_app.resume()
 

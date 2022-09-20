@@ -1,8 +1,10 @@
+from time import monotonic_ns
+
 import terminalio
 from adafruit_display_text.bitmap_label import Label
 
-from adafruit_display_text.scrolling_label import ScrollingLabel
 from adafruit_displayio_layout.layouts.grid_layout import GridLayout
+from adafruit_hid.keycode import Keycode
 from rainbowio import colorwheel
 
 from macropad_os import App
@@ -24,6 +26,8 @@ modified_labels = [
 ]
 
 
+COLOR_UPDATE_RATE = 50000000 # .05 seconds
+
 class NumpadApp(App):
 
     def __init__(self, macropad, config):
@@ -34,6 +38,7 @@ class NumpadApp(App):
         self.labels = []
         self.title = "Numpad"
         self.modifier_pressed = False
+        self.last_color_update = 0
 
     def on_start(self):
         print("on start from the app!")
@@ -65,6 +70,10 @@ class NumpadApp(App):
     def update_key_colors(self):
         self.wheel_offset += 1
         colors = []
+
+        last_update_ago = monotonic_ns() - self.last_color_update
+        if last_update_ago > COLOR_UPDATE_RATE:
+            self.last_color_update = monotonic_ns()
         for pixel in range(12):
             if self.lit_keys[pixel]:
                 (r, g, b) = rgb_from_int(colorwheel((pixel / 12 * 256) + self.wheel_offset))
@@ -74,12 +83,11 @@ class NumpadApp(App):
         self.set_colors(colors)
 
     def process_keys_pressed_callback(self, keyevent):
-        print("PROCESS KEYS CALLBACK FROM DEBUG")
         print(keyevent)
+        self.keyboard.send(Keycode.SHIFT,Keycode.SHIFT,Keycode.SHIFT, Keycode.A)
 
     def process_keys_released_callback(self, keyevent):
-        print("PROCESS KEYS RELEASED CALLBACK FROM DEBUG")
         print(keyevent)
+
     def process_enbcoder_changed(self, keyevent):
-        print("PROCESS Encoder Changed Callback FROM DEBUG")
         print(keyevent)
