@@ -143,12 +143,13 @@ class App(object):
 
     def _stop_tone_for_key(self, key_number):
         self.macropad.stop_tone()
-        self._pressed_keys.remove(key_number)
-        if self._pressed_keys and self.config.key_tone_enabled():
-            if key_number in self._key_tones:
-                self.macropad.start_tone(self._key_tones[self._pressed_keys[0]])
-            else:
-                self.macropad.start_tone(self.config.key_tone_hz())
+        if key_number in self._pressed_keys:
+            self._pressed_keys.remove(key_number)
+            if self._pressed_keys and self.config.key_tone_enabled():
+                if key_number in self._key_tones:
+                    self.macropad.start_tone(self._key_tones[self._pressed_keys[0]])
+                else:
+                    self.macropad.start_tone(self.config.key_tone_hz())
 
     def _process_wheel_changes(self) -> None:
         encoder = self.macropad.encoder

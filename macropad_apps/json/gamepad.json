@@ -1,54 +1,53 @@
 {
-    "profileName" : "Gamepad",
+    "profileName" : "Gamepad Json",
     "sortOrder"   : 1,
-    
     "key1" : {
-        "text"  : ["ESC"],
-        "value" : ["ESCAPE"]
+        "text"  : "ESC",
+        "values" : ["ESCAPE"]
     },
     "key2" : {
-        "text"  : ["Tab"],
-        "value" : ["TAB"]
+        "text"  : "Tab",
+        "values" : ["TAB"]
     },
     "key3" : {
-        "text"  : ["R"],
-        "value" : ["R"]
+        "text"  : "R",
+        "values" : ["R"]
     },
     "key4" : {
-        "text"  : ["Q"],
-        "value" : ["Q"]
+        "text"  : "Q",
+        "values" : ["Q"]
     },
     "key5" : {
-        "text"  : ["W"],
-        "value" : ["W"]
+        "text"  : "W",
+        "values" : ["W"]
     },
     "key6" : {
-        "text"  : ["E"],
-        "value" : ["E"]
+        "text"  : "E",
+        "values" : ["E"]
     },
     "key7" : {
-        "text"  : ["A"],
-        "value" : ["A"]
+        "text"  : "A",
+        "values" : ["A"]
     },
     "key8" : {
-        "text"  : ["S"],
-        "value" : ["S"]
+        "text"  : "S",
+        "values" : ["S"]
     },
     "key9" : {
-        "text"  : ["D"],
-        "value" : ["D"]
+        "text"  : "D",
+        "values" : ["D"]
     },
     "key10" : {
-        "text"  : ["Shift"],
-        "value" : [""]
+        "text"  : "Shift",
+        "values" : ["SHIFT"]
     },
     "key11" : {
-        "text"  : ["C"],
-        "value" : ["C"]
+        "text"  : "C",
+        "values" : ["C"]
     },
     "key12" : {
-        "text"  : ["Space"],
-        "value" : ["SPACEBAR"]
+        "text"  : "Space",
+        "values" : ["SPACEBAR"]
     }
 }
 

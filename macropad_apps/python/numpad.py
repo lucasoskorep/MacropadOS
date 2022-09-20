@@ -16,14 +16,12 @@ COLOR_UPDATE_RATE = 33000000  # .033 seconds
 class NumpadApp(App):
     def __init__(self, macropad, config):
         super().__init__(macropad, config)
-        self.name = "Numpad"
+        self.name = "NumpadApp"
         self.wheel_offset = 0
-        self.lit_keys = [False] * 12
         self.labels = []
         self.title = "Numpad"
         self.modifier_pressed = False
         self.last_color_update = 0
-        self.modifier_pressed = False
         self.macros = MacroSet(
             [
                 Macro("7", Keycode.SEVEN), Macro("8", Keycode.EIGHT), Macro("9", Keycode.NINE),
@@ -36,7 +34,7 @@ class NumpadApp(App):
             encoder_down=Macro("-", Keycode.KEYPAD_MINUS),
         )
         self.mod_macros = MacroSet([
-            Macro("<", Keycode.SHIFT, Keycode.COMMA), Macro(">", Keycode.SHIFT, Keycode.PERIOD), Macro("&", Keycode.SHIFT, Keycode.SEVEN),
+            Macro("<", Keycode.SHIFT, Keycode.COMMA), Macro(">", Keycode.SHIFT, Keycode.PERIOD), Macro("BACKSP", Keycode.BACKSPACE),
 
             Macro("(", Keycode.SHIFT, Keycode.NINE), Macro(")", Keycode.SHIFT, Keycode.ZERO),Macro("%", Keycode.SHIFT, Keycode.FIVE),
 
@@ -62,7 +60,6 @@ class NumpadApp(App):
         print("on start from the app!")
         self.set_layout(GridLayout(x=0, y=9, width=128, height=54, grid_size=(3, 4), cell_padding=1))
         self.set_title(self.title)
-        self.lit_keys = [True] * 12
         for i in range(12):
             self.labels.append(Label(terminalio.FONT, text=self.active_macros.get_macro_from_key(i).name))
         for index in range(12):
@@ -93,11 +90,8 @@ class NumpadApp(App):
         if last_update_ago > COLOR_UPDATE_RATE:
             self.last_color_update = monotonic_ns()
         for pixel in range(12):
-            if self.lit_keys[pixel]:
-                (r, g, b) = rgb_from_int(colorwheel((pixel / 12 * 256) + self.wheel_offset))
-                colors.append((r, g, b))
-            else:
-                colors.append((0, 0, 0))
+            (r, g, b) = rgb_from_int(colorwheel((pixel / 12 * 256) + self.wheel_offset))
+            colors.append((r, g, b))
         self.set_colors(colors)
 
     def process_keys_pressed_callback(self, key_event):

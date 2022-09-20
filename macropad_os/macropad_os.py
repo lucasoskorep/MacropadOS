@@ -1,23 +1,29 @@
-import time
+import time, os
+
+from . import App
 from .app_state import AppState
 
-from macropad_os.system_apps import OptionsApp, DebugApp
+from macropad_os.system_apps import OptionsApp, DebugApp, JsonApp
 
 
 class MacropadOS(object):
-    def __init__(self, macropad, config, apps):
+    def __init__(self, macropad, config, python_apps: str, json_apps: str):
         print("app router")
         self.macropad = macropad
         self.app_index = 0
-        self.apps = [a(macropad, config) for a in apps]
         self.options = OptionsApp(macropad, config)
-        self.current_app = self.apps[self.app_index]
         self.config = config
         self.encoder_state = False
         self.options_time = 500000000  # .5 seconds in nanoseconds
         self.click_time = 0
         self.debug_app = DebugApp(macropad, config, "DEBUG APP")
         self.debug_app_active = self.config.debug_app_enabled()
+        self.python_apps_location = python_apps
+        self.json_apps_location = json_apps
+        self.apps: [App] = []
+        self.load_python_apps()
+        self.load_json_apps()
+        self.current_app = self.apps[self.app_index]
         if self.debug_app_active:
             self.apps.append(self.debug_app)
 
@@ -37,6 +43,39 @@ class MacropadOS(object):
         if self.current_app._state is AppState.PAUSED:
             print("Starting new app")
             self.current_app.resume()
+
+    def load_python_apps(self):
+        app_classes = []
+        for filename in sorted(os.listdir(self.python_apps_location)):
+            if filename.endswith('.py') and not filename.startswith('._'):
+                try:
+                    print(filename)
+                    module = __import__(self.python_apps_location + '/' + filename[:-3])
+                    classes = [getattr(module, a) for a in dir(module)
+                               if isinstance(getattr(module, a), type)]
+                    for cls in classes:
+                        if issubclass(cls, App) and cls.__name__ != "App":
+                            app_classes.append(cls)
+                    print(app_classes)
+                except (SyntaxError, ImportError, AttributeError, KeyError, NameError, IndexError, TypeError) as err:
+                    print("ERROR in", filename)
+                    import traceback
+                    traceback.print_exception(err, err, err.__traceback__)
+        self.apps.extend(a(self.macropad, self.config) for a in app_classes)
+
+    def load_json_apps(self):
+        json_apps = []
+        for filename in sorted(os.listdir(self.json_apps_location)):
+            if filename.endswith('.json'):
+                json_apps.append(
+                    JsonApp(
+                        self.macropad,
+                        self.config,
+                        self.json_apps_location + "/" + filename
+                    )
+                )
+        json_apps.sort(key=lambda x: x.sort_order)
+        self.apps.extend(json_apps)
 
     def start(self) -> None:
         print(self.current_app)

@@ -1,53 +1,52 @@
 {
-    "profileName" : "NumPad",
+    "profileName" : "Numpad Json",
     "sortOrder"   : 0,
-    
     "key1" : {
-        "text"  : ["7"],
-        "value" : ["SEVEN"]
+        "text"  : "7",
+        "values" : ["SEVEN"]
     },
     "key2" : {
-        "text"  : ["8"],
-        "value" : ["EIGHT"]
+        "text"  : "8",
+        "values" : ["EIGHT"]
     },
     "key3" : {
-        "text"  : ["9"],
-        "value" : ["NINE"]
+        "text"  : "9",
+        "values" : ["NINE"]
     },
     "key4" : {
-        "text"  : ["4"],
-        "value" : ["FOUR"]
+        "text"  : "4",
+        "values" : ["FOUR"]
     },
     "key5" : {
-        "text"  : ["5"],
-        "value" : ["FIVE"]
+        "text"  : "5",
+        "values" : ["FIVE"]
     },
     "key6" : {
-        "text"  : ["6"],
-        "value" : ["SIX"]
+        "text"  : "6",
+        "values" : ["SIX"]
     },
     "key7" : {
-        "text"  : ["1"],
-        "value" : ["ONE"]
+        "text"  : "1",
+        "values" : ["ONE"]
     },
     "key8" : {
-        "text"  : ["2"],
-        "value" : ["TWO"]
+        "text"  : "2",
+        "values" : ["TWO"]
     },
     "key9" : {
-        "text"  : ["3"],
-        "value" : ["THREE"]
+        "text"  : "3",
+        "values" : ["THREE"]
     },
     "key10" : {
-        "text"  : ["0"],
-        "value" : ["ZERO"]
+        "text"  : "0",
+        "values" : ["ZERO"]
     },
     "key11" : {
-        "text"  : ["."],
-        "value" : ["PERIOD"]
+        "text"  : ".",
+        "values" : ["PERIOD"]
     },
     "key12" : {
-        "text"  : ["ENT"],
-        "value" : ["RETURN"]
+        "text"  : "ENT",
+        "values" : ["RETURN"]
     }
 }
