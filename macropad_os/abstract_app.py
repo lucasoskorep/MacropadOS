@@ -199,7 +199,6 @@ class App(object):
             self._key_lights[key_value] = color
 
     def set_colors(self, colors) -> None:
-        print(time.time())
         if len(colors) != 12:
             raise ValueError("Colors must be passed in as a 12 len array")
         for color in colors:

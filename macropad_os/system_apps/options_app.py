@@ -204,7 +204,7 @@ class OptionsApp(App):
 
     def on_wheel_change(self, event):
         if event > 0:
-            self._up()
-        else:
             self._down()
+        else:
+            self._up()
         self.update_settings_menu()

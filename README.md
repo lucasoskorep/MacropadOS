@@ -29,7 +29,8 @@ This repo contains everything you need to get started, from building the macropa
 creating your own apps!
 
 
-## Building the Macropad (Pictures coming soon<sup>tm</sup>):
+## Building the Macropad :
+Pictures and a more complete build guide coming soon<sup>tm</sup>
 
 See the 3d_printing_files folder for all the required .3mf model files!
 If printing at home is not an option for you, you can reach out to https://craftcloud3d.com or similar services to 
