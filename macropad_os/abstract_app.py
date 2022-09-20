@@ -14,7 +14,7 @@ def convert_to_keynum(x, y):
 
 #TODO: Limit sounds to a similar rate as well for better performance
 
-MAX_LIGHTING_UPDATE_RATE = 50000000 # .05 seconds
+MAX_LIGHTING_UPDATE_RATE = 33000000 # .033 seconds
 
 class App(object):
 

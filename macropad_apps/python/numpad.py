@@ -26,7 +26,7 @@ modified_labels = [
 ]
 
 
-COLOR_UPDATE_RATE = 50000000 # .05 seconds
+COLOR_UPDATE_RATE = 33000000 # .033 seconds
 
 class NumpadApp(App):
 
