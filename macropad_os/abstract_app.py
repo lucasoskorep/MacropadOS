@@ -1,10 +1,11 @@
-from time import monotonic_ns
-
 import displayio
 import terminalio
-from adafruit_display_text import label
 
+from time import monotonic_ns, sleep
+
+from adafruit_display_text import label
 from macropad_os import AppState, InvalidStateUpdateError, Config
+from macropad_os.app_utils import Macro
 
 DISPLAY = displayio.Group()
 
@@ -12,12 +13,13 @@ DISPLAY = displayio.Group()
 def convert_to_keynum(x, y):
     return 3 * x + y
 
-#TODO: Limit sounds to a similar rate as well for better performance
 
-MAX_LIGHTING_UPDATE_RATE = 33000000 # .033 seconds
+# TODO: Limit sounds to a similar rate as well for better performance
+
+MAX_LIGHTING_UPDATE_RATE = 33000000  # .033 seconds
+
 
 class App(object):
-
     def __init__(self, macropad, config: Config):
         """
 
@@ -174,7 +176,7 @@ class App(object):
 
     def _update_lighting(self) -> None:
         last_update_ago = monotonic_ns() - self._last_lighting_update
-        if last_update_ago >  MAX_LIGHTING_UPDATE_RATE:
+        if last_update_ago > MAX_LIGHTING_UPDATE_RATE:
             self._last_lighting_update = monotonic_ns()
             new_brightness = self.config.brightness()
             if self._current_brightness != new_brightness:
@@ -258,6 +260,63 @@ class App(object):
     def set_labels(self, labels) -> None:
         self._labels = labels
         # if self._layout
+
+    def press_macro(self, macro:Macro) -> None:
+        for item in macro.codes:
+            if callable(item):
+                item()
+            elif isinstance(item, int):
+                if item >= 0:
+                    self.macropad.keyboard.press(item)
+                else:
+                    self.macropad.keyboard.release(-item)
+            elif isinstance(item, float):
+                sleep(item)
+            elif isinstance(item, str):
+                self.macropad.keyboard_layout.write(item)
+            elif isinstance(item, list):
+                for code in item:
+                    if isinstance(code, int):
+                        self.macropad.consumer_control.release()
+                        self.macropad.consumer_control.press(code)
+                    if isinstance(code, float):
+                        sleep(code)
+            elif isinstance(item, dict):
+                if 'buttons' in item:
+                    if item['buttons'] >= 0:
+                        self.macropad.mouse.press(item['buttons'])
+                    else:
+                        self.macropad.mouse.release(-item['buttons'])
+                self.macropad.mouse.move(item['x'] if 'x' in item else 0,
+                                    item['y'] if 'y' in item else 0,
+                                    item['wheel'] if 'wheel' in item else 0)
+                if 'tone' in item:
+                    if item['tone'] > 0:
+                        self.macropad.stop_tone()
+                        self.macropad.start_tone(item['tone'])
+                    else:
+                        self.macropad.stop_tone()
+                elif 'play' in item:
+                    self.macropad.play_file(item['play'])
+
+    def release_macro(self, macro:Macro) -> None:
+        for item in macro.codes:
+            if isinstance(item, int):
+                if item >= 0:
+                    self.macropad.keyboard.release(item)
+            elif isinstance(item, dict):
+                if 'buttons' in item:
+                    if item['buttons'] >= 0:
+                        self.macropad.mouse.release(item['buttons'])
+                elif 'tone' in item:
+                    self.macropad.stop_tone()
+        self.macropad.consumer_control.release()
+        release_action = macro.released
+        if release_action:
+            if callable(release_action):
+                release_action()
+            else:
+                self.keyboard.send(release_action)
 
     def register_on_key_pressed(self, function) -> None:
         self._key_pressed_callbacks.append(function)

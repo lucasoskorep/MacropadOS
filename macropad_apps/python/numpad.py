@@ -12,11 +12,8 @@ from macropad_os.app_utils import rgb_from_int, MacroSet, Macro
 
 COLOR_UPDATE_RATE = 33000000  # .033 seconds
 
-SWAP_MODE = lambda x: not x
-
 
 class NumpadApp(App):
-
     def __init__(self, macropad, config):
         super().__init__(macropad, config)
         self.name = "Numpad"
@@ -29,17 +26,17 @@ class NumpadApp(App):
         self.modifier_pressed = False
         self.macros = MacroSet(
             [
-                Macro("7", Keycode.KEYPAD_SEVEN), Macro("8", Keycode.KEYPAD_EIGHT), Macro("9", Keycode.KEYPAD_NINE),
-                Macro("4", Keycode.KEYPAD_FOUR), Macro("5", Keycode.KEYPAD_FIVE), Macro("6", Keycode.KEYPAD_SIX),
-                Macro("1", Keycode.KEYPAD_ONE), Macro("2", Keycode.KEYPAD_TWO), Macro("3", Keycode.KEYPAD_THREE),
-                Macro("0", Keycode.KEYPAD_ZERO), Macro(".", Keycode.KEYPAD_PERIOD),
+                Macro("7", Keycode.SEVEN), Macro("8", Keycode.EIGHT), Macro("9", Keycode.NINE),
+                Macro("4", Keycode.FOUR), Macro("5", Keycode.FIVE), Macro("6", Keycode.SIX),
+                Macro("1", Keycode.ONE), Macro("2", Keycode.TWO), Macro("3", Keycode.THREE),
+                Macro("0", Keycode.ZERO), Macro(".", Keycode.PERIOD),
                 Macro("Mod", self.swap_modifier, released=self.swap_modifier)
             ],
             encoder_up=Macro("+", Keycode.KEYPAD_PLUS),
             encoder_down=Macro("-", Keycode.KEYPAD_MINUS),
         )
         self.mod_macros = MacroSet([
-            Macro("<", Keycode.LEFT_ARROW), Macro(">", Keycode.RIGHT_ARROW), Macro("&", Keycode.SHIFT, Keycode.SEVEN),
+            Macro("<", Keycode.SHIFT, Keycode.COMMA), Macro(">", Keycode.SHIFT, Keycode.PERIOD), Macro("&", Keycode.SHIFT, Keycode.SEVEN),
 
             Macro("(", Keycode.SHIFT, Keycode.NINE), Macro(")", Keycode.SHIFT, Keycode.ZERO),Macro("%", Keycode.SHIFT, Keycode.FIVE),
 
@@ -104,20 +101,10 @@ class NumpadApp(App):
         self.set_colors(colors)
 
     def process_keys_pressed_callback(self, key_event):
-        for code in self.active_macros.get_macro_from_key(key_event).codes:
-            if code:
-                if callable(code):
-                    code()
-                else:
-                    self.keyboard.send(code)
+        self.press_macro(self.active_macros.get_macro_from_key(key_event))
 
     def process_keys_released_callback(self, key_event):
-        release_action = self.active_macros.get_macro_from_key(key_event).released
-        if release_action:
-            if callable(release_action):
-                release_action()
-            else:
-                self.keyboard.send(release_action)
+        self.release_macro(self.active_macros.get_macro_from_key(key_event))
 
     def process_enbcoder_changed(self, key_event):
         print(key_event)
