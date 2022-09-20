@@ -8,25 +8,12 @@ from adafruit_hid.keycode import Keycode
 from rainbowio import colorwheel
 
 from macropad_os import App
-from macropad_os.app_utils import rgb_from_int
+from macropad_os.app_utils import rgb_from_int, MacroSet, Macro
 
+COLOR_UPDATE_RATE = 33000000  # .033 seconds
 
-labels = [
-    "7", "8", "9",
-    "4", "5", "6",
-    "1", "2", "3",
-    "0", ".", "SHIFT"
-]
+SWAP_MODE = lambda x: not x
 
-modified_labels = [
-    "<", ">", "&",
-    "(", ")", "%",
-    "/", "+", "-",
-    "*", "=", "SHIFT"
-]
-
-
-COLOR_UPDATE_RATE = 33000000 # .033 seconds
 
 class NumpadApp(App):
 
@@ -39,6 +26,40 @@ class NumpadApp(App):
         self.title = "Numpad"
         self.modifier_pressed = False
         self.last_color_update = 0
+        self.modifier_pressed = False
+        self.macros = MacroSet(
+            [
+                Macro("7", Keycode.KEYPAD_SEVEN), Macro("8", Keycode.KEYPAD_EIGHT), Macro("9", Keycode.KEYPAD_NINE),
+                Macro("4", Keycode.KEYPAD_FOUR), Macro("5", Keycode.KEYPAD_FIVE), Macro("6", Keycode.KEYPAD_SIX),
+                Macro("1", Keycode.KEYPAD_ONE), Macro("2", Keycode.KEYPAD_TWO), Macro("3", Keycode.KEYPAD_THREE),
+                Macro("0", Keycode.KEYPAD_ZERO), Macro(".", Keycode.KEYPAD_PERIOD),
+                Macro("Mod", self.swap_modifier, released=self.swap_modifier)
+            ],
+            encoder_up=Macro("+", Keycode.KEYPAD_PLUS),
+            encoder_down=Macro("-", Keycode.KEYPAD_MINUS),
+        )
+        self.mod_macros = MacroSet([
+            Macro("<", Keycode.LEFT_ARROW), Macro(">", Keycode.RIGHT_ARROW), Macro("&", Keycode.SHIFT, Keycode.SEVEN),
+
+            Macro("(", Keycode.SHIFT, Keycode.NINE), Macro(")", Keycode.SHIFT, Keycode.ZERO),Macro("%", Keycode.SHIFT, Keycode.FIVE),
+
+            Macro("/", Keycode.FORWARD_SLASH), Macro("+", Keycode.KEYPAD_PLUS), Macro("-", Keycode.MINUS),
+
+            Macro("*", Keycode.SHIFT, Keycode.EIGHT), Macro("=", Keycode.EQUALS), Macro("Mod", self.swap_modifier, released=self.swap_modifier)
+        ],
+            encoder_up=Macro("+", Keycode.KEYPAD_PLUS),
+            encoder_down=Macro("-", Keycode.KEYPAD_MINUS),
+        )
+        self.active_macros = self.macros
+
+    def swap_modifier(self):
+        self.modifier_pressed = not self.modifier_pressed
+        if self.modifier_pressed:
+            self.active_macros = self.mod_macros
+        else:
+            self.active_macros = self.macros
+        for i in range(12):
+            self.labels[i].text = self.active_macros.get_macro_from_key(i).name
 
     def on_start(self):
         print("on start from the app!")
@@ -46,7 +67,7 @@ class NumpadApp(App):
         self.set_title(self.title)
         self.lit_keys = [True] * 12
         for i in range(12):
-            self.labels.append(Label(terminalio.FONT, text=labels[i]))
+            self.labels.append(Label(terminalio.FONT, text=self.active_macros.get_macro_from_key(i).name))
         for index in range(12):
             x = index % 3
             y = index // 3
@@ -82,12 +103,21 @@ class NumpadApp(App):
                 colors.append((0, 0, 0))
         self.set_colors(colors)
 
-    def process_keys_pressed_callback(self, keyevent):
-        print(keyevent)
-        self.keyboard.send(Keycode.SHIFT,Keycode.SHIFT,Keycode.SHIFT, Keycode.A)
+    def process_keys_pressed_callback(self, key_event):
+        for code in self.active_macros.get_macro_from_key(key_event).codes:
+            if code:
+                if callable(code):
+                    code()
+                else:
+                    self.keyboard.send(code)
 
-    def process_keys_released_callback(self, keyevent):
-        print(keyevent)
+    def process_keys_released_callback(self, key_event):
+        release_action = self.active_macros.get_macro_from_key(key_event).released
+        if release_action:
+            if callable(release_action):
+                release_action()
+            else:
+                self.keyboard.send(release_action)
 
-    def process_enbcoder_changed(self, keyevent):
-        print(keyevent)
+    def process_enbcoder_changed(self, key_event):
+        print(key_event)
